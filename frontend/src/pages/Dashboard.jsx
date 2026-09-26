@@ -5,7 +5,7 @@ import '../App.css';
 import '../Meeting.css';
 import '../InterviewerCards.css';
 
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8001";
 
 function Dashboard() {
     const navigate = useNavigate();

@@ -5,6 +5,8 @@ import { Mail, Lock, User, ArrowRight, Brain } from 'lucide-react';
 import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 
+const API_BASE = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8001";
+
 const Signup = () => {
     const [formData, setFormData] = useState({
         email: '',
@@ -18,7 +20,7 @@ const Signup = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const res = await axios.post('http://localhost:8000/auth/signup', formData);
+            const res = await axios.post(`${API_BASE}/auth/signup`, formData);
             localStorage.setItem('token', res.data.access_token);
             localStorage.setItem('user', JSON.stringify(res.data.user));
             navigate('/dashboard');
@@ -30,7 +32,7 @@ const Signup = () => {
 
     const handleGoogleSuccess = async (credentialResponse) => {
         try {
-            const res = await axios.post('http://localhost:8000/auth/google', {
+            const res = await axios.post(`${API_BASE}/auth/google`, {
                 token: credentialResponse.credential
             });
             localStorage.setItem('token', res.data.access_token);
@@ -40,6 +42,7 @@ const Signup = () => {
             alert(err.response?.data?.detail || "Google Signup failed");
         }
     };
+
 
     return (
         <div className="auth-container">

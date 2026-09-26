@@ -5,6 +5,8 @@ import { Mail, Lock, ArrowRight, Brain } from 'lucide-react';
 import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 
+const API_BASE = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8001";
+
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -15,7 +17,7 @@ const Login = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const res = await axios.post('http://localhost:8000/auth/login', { email, password });
+            const res = await axios.post(`${API_BASE}/auth/login`, { email, password });
             localStorage.setItem('token', res.data.access_token);
             localStorage.setItem('user', JSON.stringify(res.data.user));
             navigate('/dashboard');
@@ -27,7 +29,7 @@ const Login = () => {
 
     const handleGoogleSuccess = async (credentialResponse) => {
         try {
-            const res = await axios.post('http://localhost:8000/auth/google', {
+            const res = await axios.post(`${API_BASE}/auth/google`, {
                 token: credentialResponse.credential
             });
             localStorage.setItem('token', res.data.access_token);
@@ -37,6 +39,7 @@ const Login = () => {
             alert(err.response?.data?.detail || "Google Login failed");
         }
     };
+
 
     return (
         <div className="auth-container">

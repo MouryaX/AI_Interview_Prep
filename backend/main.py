@@ -15,8 +15,13 @@ from services.company_intelligence import get_company_intelligence
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 import os
+from dotenv import load_dotenv
+
+# Ensure .env is explicitly loaded
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"), override=True)
 
 from contextlib import asynccontextmanager
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -64,7 +69,17 @@ async def google_login(data: schemas.GoogleLoginRequest, db: Session = Depends(d
     try:
         # 1. Verify Google Token
         CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
-        idinfo = id_token.verify_oauth2_token(data.token, google_requests.Request(), CLIENT_ID)
+        if CLIENT_ID:
+            CLIENT_ID = CLIENT_ID.strip()
+
+        print(f"LOG [Google Auth]: GOOGLE_CLIENT_ID present={bool(CLIENT_ID)}, prefix={CLIENT_ID[:12] if CLIENT_ID else 'None'}")
+
+        idinfo = id_token.verify_oauth2_token(
+            data.token, 
+            google_requests.Request(), 
+            CLIENT_ID,
+            clock_skew_in_seconds=10
+        )
 
         # 2. Get user info from Google
         email = idinfo['email']
@@ -92,11 +107,13 @@ async def google_login(data: schemas.GoogleLoginRequest, db: Session = Depends(d
             "token_type": "bearer",
             "user": db_user
         }
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid Google token")
+    except ValueError as ve:
+        print(f"ERROR [Google Auth ValueError]: {ve}")
+        raise HTTPException(status_code=400, detail=f"Invalid Google token: {ve}")
     except Exception as e:
-        print(f"Error in Google login: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error during Google login")
+        print(f"ERROR [Google Auth Exception]: {e}")
+        raise HTTPException(status_code=500, detail=f"Internal server error during Google login: {e}")
+
 
 @app.get("/users/stats")
 async def get_user_stats(db: Session = Depends(database.get_db), current_user: models.User = Depends(auth_utils.get_current_user)):

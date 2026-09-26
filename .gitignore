@@ -13,7 +13,12 @@ backend/.pytest_cache/
 htmlcov/
 .mypy_cache/
 .env
+*.env
+**/.env
 backend/.env
+frontend/.env
+simple_interview_prep/backend/.env
+
 backend/data/*.json.bak
 
 # AI Support (Large Files)

@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+sqlalchemy
+alembic
+google-genai
+psycopg2-binary
+python-dotenv
+pydantic
+pydantic-settings
